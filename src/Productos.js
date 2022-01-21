@@ -4,7 +4,6 @@ import { deleteObject, getDownloadURL, getStorage, ref } from "firebase/storage"
 import { useEffect, useState } from "react";
 
 const Productos = () => {
-    console.log(Mias)
     const [Productos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
     const [pujas, setPujas] = useState([])
@@ -51,6 +50,15 @@ const Productos = () => {
                             {
                                     <p>{elem.descripcion}</p>
                             }
+                            {getAuth().currentUser.uid == elem.autor &&
+                                <input type="number" ></input> &&
+                                <button onClick={async () => {
+                                    runTransaction(getFirestore(), async (transaction) => {
+                                        transaction.update(elem.ref, { descripcion: elem.descripcion })
+                                    })
+                                }}>Guardar cambios</button>}
+
+
                             <input type="number" ></input>
                             <p>Puja {elem.likes}</p>
                             <button onClick={() => {
@@ -59,7 +67,7 @@ const Productos = () => {
                                     transaction.update(elem.ref, { likes: doc.data().likes + 1 })
                                 }).then(cargarProductos)
                             }
-                            }>❤️</button>
+                            }>Pujar</button>
                             {getAuth().currentUser.uid == elem.autor &&
                                 <button onClick={async () => {
                                     await deleteDoc(elem.ref);

@@ -4,7 +4,6 @@ import { deleteObject, getDownloadURL, getStorage, ref } from "firebase/storage"
 import { useEffect, useState } from "react";
 
 const MisProductos = () => {
-    console.log(Mias)
     const [MisProductos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
     const [precio, setPrecio] = useState(0)
