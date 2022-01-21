@@ -20,7 +20,7 @@ const App = () => {
         ventana === "Login" ? <Login setVentana={setVentana}></Login> :
           ventana === "Productos" ? <Productos Mias={false}></Productos> :
             ventana === "MisProductos" ? <MisProductos></MisProductos> :
-              ventana === "SubirProducto" ? <SubirProducto setVentana={setVentana}></SubirProducto> :
+              ventana === "SubirProductos" ? <SubirProducto setVentana={setVentana}></SubirProducto> :
                 "No se ha encontrado la pestaña"
       }
     </>
