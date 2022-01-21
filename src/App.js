@@ -3,10 +3,10 @@
 
 import { useState } from "react";
 import Barra from "./Barra";
-import Imagenes from "./Imagenes";
 import Login from "./Login";
-import SubirImagen from "./SubirImagen";
-
+import SubirProducto from "./SubirProductos";
+import MisProductos from "./MisProductos";
+import Productos from "./Productos";
 const App = () => {
 
   const [ventana, setVentana] = useState("Login")
@@ -16,12 +16,11 @@ const App = () => {
       {
         (ventana !== "Login") && <Barra setVentana={setVentana} ></Barra>
       }
-
       {
         ventana === "Login" ? <Login setVentana={setVentana}></Login> :
-          ventana === "Imagenes" ? <Imagenes Mias={false}></Imagenes> :
-            ventana === "MisImagenes" ? <Imagenes Mias={true}></Imagenes> :
-              ventana === "SubirImagen" ? <SubirImagen setVentana={setVentana}></SubirImagen> :
+          ventana === "Productos" ? <Productos Mias={false}></Productos> :
+            ventana === "MisProductos" ? <MisProductos></MisProductos> :
+              ventana === "SubirProducto" ? <SubirProducto setVentana={setVentana}></SubirProducto> :
                 "No se ha encontrado la pestaña"
       }
     </>

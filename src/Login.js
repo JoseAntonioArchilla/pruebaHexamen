@@ -11,7 +11,7 @@ const Login = ({ setVentana }) => {
 		const auth = getAuth();
 		signInWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
-				setVentana("MisImagenes")
+				setVentana("MisProductos")
 			})
 			.catch((error) => {
 				console.log(error)
@@ -21,7 +21,7 @@ const Login = ({ setVentana }) => {
 		const auth = getAuth();
 		createUserWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
-				setVentana("ImageUploader")
+				setVentana("MisProductos")
 			})
 			.catch((error) => {
 				console.error(error)
