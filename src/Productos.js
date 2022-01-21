@@ -2,11 +2,13 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs, query, where, runTransaction, DocumentReference, deleteDoc } from "firebase/firestore";
 import { deleteObject, getDownloadURL, getStorage, ref } from "firebase/storage";
 import { useEffect, useState } from "react";
-
+const admin = require('firebase-admin');
+const db = admin.firestore()
+const PujasRef = collection(db, "pujas");
 const Productos = () => {
     const [Productos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
-    const [pujas, setPujas] = useState([])
+    const [pujas, setPujas] = useState(null)
 
     const cargarProductos = () => {
         setProductos([])
@@ -20,24 +22,24 @@ const Productos = () => {
                     setProductos((old) => [...old, { ...doc.data(), url: url, id: doc.id, ref: doc.ref }])
                 })
             })
+            
         }).catch(e => console.error(e))
     }
-
+    const key = function (obj) {
+        // Some unique object-dependent key
+        return obj.totallyUniqueEmployeeIdKey; // Just an example
+    };
     const cargarPujas = () => {
-        setPujas([])
-        const db = getFirestore()
-        getDocs(query(collection(db, "pujas"))).then(snapshot => {
-            const storage = getStorage()
-            snapshot.docs.map((doc) => {
-                getDownloadURL(ref(storage, doc.id)).then((url) => {
-                    setProductos((old) => [...old, { ...doc.data(), url: url, id: doc.id, ref: doc.ref }])
-                })
-            })
-        }).catch(e => console.error(e))
+        var dict = {};
+        const querySnapshot = await getDocs(collection(db, "pujas"));
+        querySnapshot.forEach((doc) => {
+            dict[key(doc.data().identificador )] = doc.data().cantidad
+        });
+        setPujas(dict)
     }
-    useEffect(cargarProductos)
-    useEffect(cargarPujas)
 
+    useEffect(cargarProductos, [])
+    useEffect(cargarPujas, [])
     return (
         <>
             <input placeholder="Filtrar por descripcion" value={descripcion} onChange={(e) => setDescripcion(e.target.value)}></input>
@@ -50,37 +52,15 @@ const Productos = () => {
                             {
                                     <p>{elem.descripcion}</p>
                             }
-                            {getAuth().currentUser.uid == elem.autor &&
-                                <input type="number" ></input> &&
-                                <button onClick={async () => {
-                                    runTransaction(getFirestore(), async (transaction) => {
-                                        transaction.update(elem.ref, { descripcion: elem.descripcion })
-                                    })
-                                }}>Guardar cambios</button>}
-
-
-                            <input type="number" ></input>
-                            <p>Puja {elem.likes}</p>
+                            <input type="number" value={pujas[key(elem.id)]}></input>
+                            <p></p>
                             <button onClick={() => {
                                 runTransaction(getFirestore(), async (transaction) => {
                                     const doc = await transaction.get(elem.ref)
-                                    transaction.update(elem.ref, { likes: doc.data().likes + 1 })
-                                }).then(cargarProductos)
+                                    transaction.update(PujasRef, { cantidad: doc.data().cantidad + 10, comprador: getAuth().currentUser.email })
+                                }).then(cargarPujas)
                             }
                             }>Pujar</button>
-                            {getAuth().currentUser.uid == elem.autor &&
-                                <button onClick={async () => {
-                                    await deleteDoc(elem.ref);
-                                    await deleteObject(ref(getStorage(), elem.id))
-                                    cargarProductos()
-                                }}>X</button>}
-                            {getAuth().currentUser.uid == elem.autor &&
-                                <button onClick={async () => {
-                                    runTransaction(getFirestore(), async (transaction) => {
-                                        transaction.update(elem.ref, { descripcion: elem.descripcion })
-                                    })
-                                }}>Guardar cambios</button>}
-
                         </div>
                     )
                 })
