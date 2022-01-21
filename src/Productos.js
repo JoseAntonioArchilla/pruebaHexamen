@@ -2,9 +2,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs, query, where, runTransaction, DocumentReference, deleteDoc } from "firebase/firestore";
 import { deleteObject, getDownloadURL, getStorage, ref } from "firebase/storage";
 import { useEffect, useState } from "react";
-const admin = require('firebase-admin');
-const db = admin.firestore()
-const PujasRef = collection(db, "pujas");
+
 const Productos = () => {
     const [Productos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
@@ -29,12 +27,15 @@ const Productos = () => {
         // Some unique object-dependent key
         return obj.totallyUniqueEmployeeIdKey; // Just an example
     };
-    const cargarPujas = () => {
+   const cargarPujas = async () => {
         var dict = {};
-        const querySnapshot = await getDocs(collection(db, "pujas"));
-        querySnapshot.forEach((doc) => {
-            dict[key(doc.data().identificador )] = doc.data().cantidad
-        });
+        const db = getFirestore()
+       const querySnapshot = getDocs(query(collection(db, "pujas"))).then(snapshot => {
+           console.log(snapshot.docs)
+           snapshot.docs.map((doc) => {
+               dict[key(doc.data().identificador)] = doc.data().cantidad
+           })  
+       });
         setPujas(dict)
     }
 
@@ -57,7 +58,8 @@ const Productos = () => {
                             <button onClick={() => {
                                 runTransaction(getFirestore(), async (transaction) => {
                                     const doc = await transaction.get(elem.ref)
-                                    transaction.update(PujasRef, { cantidad: doc.data().cantidad + 10, comprador: getAuth().currentUser.email })
+                                    const db = getFirestore()
+                                    transaction.update(collection(db, "pujas"), { cantidad: doc.data().cantidad  + 10, comprador: getAuth().currentUser.email })
                                 }).then(cargarPujas)
                             }
                             }>Pujar</button>

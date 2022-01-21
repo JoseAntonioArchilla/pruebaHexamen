@@ -2,12 +2,18 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs, query, where, runTransaction, DocumentReference, deleteDoc } from "firebase/firestore";
 import { deleteObject, getDownloadURL, getStorage, ref } from "firebase/storage";
 import { useEffect, useState } from "react";
+//const db = getFirestore()
+//const PujasRef = collection(db, "pujas");
 
 const MisProductos = () => {
     const [MisProductos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
     const [precio, setPrecio] = useState(0)
-
+    const [pujas, setPujas] = useState(null)
+    const key = function (obj) {
+        // Some unique object-dependent key
+        return obj.totallyUniqueEmployeeIdKey; // Just an example
+    };
     const cargarProductos = () => {
         setProductos([])
         const db = getFirestore()
@@ -20,7 +26,15 @@ const MisProductos = () => {
             })
         }).catch(e => console.error(e))
     }
-
+    const cargarPujas = async () => {
+        var dict = {};
+        const db = getFirestore()
+        const querySnapshot = await getDocs(collection(db, "pujas"));
+        querySnapshot.forEach((doc) => {
+            dict[key(doc.data().identificador)] = {cantidad: doc.data().cantidad, comprador: doc.data().comprador}
+        });
+        setPujas(dict)
+    }
     
     
     useEffect(cargarProductos, [])
@@ -29,7 +43,7 @@ const MisProductos = () => {
     return (
         <>
             <input placeholder="Texto" value={descripcion} onChange={(e) => setDescripcion(e.target.value)}></input>
-            <input type="number" readonly placeholder="Precio salida" value={precio} onChange={(e) => setPrecio(e.target.value)}></input>
+            <input type="number" readOnly placeholder="Precio salida" value={precio} onChange={(e) => setPrecio(e.target.value)}></input>
             <button onClick={cargarProductos}>Buscar</button>
             {
                 MisProductos != null && MisProductos.map((elem, idx) => {
@@ -48,12 +62,12 @@ const MisProductos = () => {
                                     await deleteObject(ref(getStorage(), elem.id))
                                     cargarProductos()
                                 }}>Eliminar Articulo</button>
-                            {getAuth().currentUser.uid == elem.autor &&
+                           
                                 <button onClick={async () => {
                                     runTransaction(getFirestore(), async (transaction) => {
-                                        transaction.update(elem.ref, { vendedor: elem.descripcion })
+                                        transaction.update(elem.ref, { comprador: elem.descripcion })
                                     })
-                                }}>Adjudicar puja</button>}
+                                }}>Adjudicar puja</button>
 
                         </div>
                     )

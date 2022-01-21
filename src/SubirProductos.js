@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, Timestamp  } from "firebase/firestore";
 
 const SubirProducto = ({ setVentana }) => {
 
@@ -13,6 +13,7 @@ const SubirProducto = ({ setVentana }) => {
     const uploadProducto = (e) => {
 
         const db = getFirestore()
+        var id = ""
         addDoc(collection(db, "articulos"), {
             vendedor: getAuth().currentUser.email,
             descripcion: descripcion,
@@ -20,14 +21,21 @@ const SubirProducto = ({ setVentana }) => {
             comprador: ""
         }).then((docRef) => {
             const storage = getStorage();
-
-            const storageRef = ref(storage, docRef.id);
+            id = docRef.id;
+            const storageRef = ref(storage, id);
 
             uploadBytes(storageRef, file).then((snapshot) => {
                 console.log('Se ha subido el articulo! ', snapshot.metadata.fullPath);
                 setVentana("MisProductos")
             }).catch((e) => console.error(e));
         }).catch((e) => console.error(e))
+
+        addDoc(collection(db, "pujas"),{
+            identificador: id,
+            cantidad: 0,
+            comprador: getAuth().currentUser.email,
+            timeStamp: Timestamp.fromDate(new Date())
+        })
     }
 
     return (
