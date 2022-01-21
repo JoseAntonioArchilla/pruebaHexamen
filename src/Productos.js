@@ -7,12 +7,12 @@ const Productos = () => {
     console.log(Mias)
     const [Productos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
-    const [hashtags, setHashtags] = useState("")
+    const [pujas, setPujas] = useState([])
 
     const cargarProductos = () => {
         setProductos([])
         const db = getFirestore()
-        getDocs(query(collection(db, "productos"))).then(snapshot => {
+        getDocs(query(collection(db, "articulos"))).then(snapshot => {
             const storage = getStorage()
             snapshot.docs.filter((doc) =>
                 ((descripcion == "") || doc.data().descripcion.includes(descripcion))
@@ -24,7 +24,20 @@ const Productos = () => {
         }).catch(e => console.error(e))
     }
 
+    const cargarPujas = () => {
+        setPujas([])
+        const db = getFirestore()
+        getDocs(query(collection(db, "pujas"))).then(snapshot => {
+            const storage = getStorage()
+            snapshot.docs.map((doc) => {
+                getDownloadURL(ref(storage, doc.id)).then((url) => {
+                    setProductos((old) => [...old, { ...doc.data(), url: url, id: doc.id, ref: doc.ref }])
+                })
+            })
+        }).catch(e => console.error(e))
+    }
     useEffect(cargarProductos)
+    useEffect(cargarPujas)
 
     return (
         <>

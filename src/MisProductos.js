@@ -12,7 +12,7 @@ const MisProductos = () => {
     const cargarProductos = () => {
         setProductos([])
         const db = getFirestore()
-        getDocs(query(collection(db, "productos"), where("vendedor", "==", getAuth().currentUser.email))).then(snapshot => {
+        getDocs(query(collection(db, "articulos"), where("vendedor", "==", getAuth().currentUser.email))).then(snapshot => {
             const storage = getStorage()
             snapshot.docs.map((doc) => {
                 getDownloadURL(ref(storage, doc.id)).then((url) => {

@@ -13,7 +13,7 @@ const SubirProducto = ({ setVentana }) => {
     const uploadProducto = (e) => {
 
         const db = getFirestore()
-        addDoc(collection(db, "imagenes"), {
+        addDoc(collection(db, "articulos"), {
             vendedor: getAuth().currentUser.email,
             descripcion: descripcion,
             precioSalida: precio,
