@@ -3,7 +3,7 @@ import { getFirestore, collection, getDocs, query, where, runTransaction, Docume
 import { deleteObject, getDownloadURL, getStorage, ref } from "firebase/storage";
 import { useEffect, useState } from "react";
 
-const Productos = ({ Mias }) => {
+const Productos = () => {
     console.log(Mias)
     const [Productos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
@@ -12,40 +12,34 @@ const Productos = ({ Mias }) => {
     const cargarProductos = () => {
         setProductos([])
         const db = getFirestore()
-        getDocs(Mias ? query(collection(db, "productos"), where("autor", "==", getAuth().currentUser.uid)) : query(collection(db, "productos"))).then(snapshot => {
+        getDocs(query(collection(db, "productos"))).then(snapshot => {
             const storage = getStorage()
             snapshot.docs.filter((doc) =>
-                ((descripcion == "") || doc.data().descripcion.includes(descripcion)) &&
-                ((hashtags == "") || hashtags.split(" ").every((item) => doc.data().descripcion.includes("#" + item)))
+                ((descripcion == "") || doc.data().descripcion.includes(descripcion))
             ).map((doc) => {
                 getDownloadURL(ref(storage, doc.id)).then((url) => {
-                    setProductos((old) => [...old, { ...doc.data(), url: url, id: doc.id, ref: doc.ref }].sort((a, b) => b.likes - a.likes))
+                    setProductos((old) => [...old, { ...doc.data(), url: url, id: doc.id, ref: doc.ref }])
                 })
             })
         }).catch(e => console.error(e))
     }
 
-    useEffect(cargarProductos, [Mias])
+    useEffect(cargarProductos)
 
     return (
         <>
-            <input placeholder="Texto" value={descripcion} onChange={(e) => setDescripcion(e.target.value)}></input>
-            <input placeholder="Hashtags separados por espacios" value={hashtags} onChange={(e) => setHashtags(e.target.value)}></input>
-            <button onClick={cargarProductos}>Buscar</button>
+            <input placeholder="Filtrar por descripcion" value={descripcion} onChange={(e) => setDescripcion(e.target.value)}></input>
+            <button onClick={cargarProductos}>Filtrar</button>
             {
                 Productos != null && Productos.map((elem, idx) => {
                     return (
                         <div key={idx}>
                             <img src={elem.url}></img>
                             {
-                                getAuth().currentUser.uid == elem.autor ?
-                                    <input value={Productos[idx].descripcion} onChange={(e) => {
-                                        Productos[idx].descripcion = e.target.value
-                                        setProductos([...Productos])
-                                    }}></input> :
                                     <p>{elem.descripcion}</p>
                             }
-                            <p>Likes {elem.likes}</p>
+                            <input type="number" ></input>
+                            <p>Puja {elem.likes}</p>
                             <button onClick={() => {
                                 runTransaction(getFirestore(), async (transaction) => {
                                     const doc = await transaction.get(elem.ref)

@@ -3,7 +3,7 @@ import { getFirestore, collection, getDocs, query, where, runTransaction, Docume
 import { deleteObject, getDownloadURL, getStorage, ref } from "firebase/storage";
 import { useEffect, useState } from "react";
 
-const MisProductos = ({ Mias }) => {
+const MisProductos = () => {
     console.log(Mias)
     const [MisProductos, setProductos] = useState([])
     const [descripcion, setDescripcion] = useState("")
